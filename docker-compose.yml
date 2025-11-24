@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  chat-agent:
+    build: .
+    container_name: chat-agent-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlite:/app/data/chat.db
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-YOUR_API_KEY_HERE}
+      - OPENAI_MODEL=gpt-3.5-turbo
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

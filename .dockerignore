@@ -1,0 +1,8 @@
+target/
+.idea/
+.mvn/
+*.iml
+.git/
+.gitignore
+chat.db
+data/
