@@ -6,7 +6,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -40,9 +42,24 @@ public class ChatController {
         return chatService.sendMessage(userId, message);
     }
 
+    @PostMapping("/chat/send-toy")
+    @ResponseBody
+    public Map<String, Object> sendMessageToToy(@RequestParam String userId,
+                                                @RequestParam String message) {
+        return chatService.sendMessageToToy(userId, message);
+    }
+
     @GetMapping("/chat/history")
     @ResponseBody
     public List<Conversation> getHistory(@RequestParam String userId) {
         return chatService.getHistory(userId);
+    }
+
+    @GetMapping("/chat/toy-status")
+    @ResponseBody
+    public Map<String, Object> getToyStatus() {
+        Map<String, Object> status = new HashMap<>();
+        status.put("healthy", chatService.isToyServiceHealthy());
+        return status;
     }
 }

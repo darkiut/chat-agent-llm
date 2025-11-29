@@ -10,6 +10,24 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:sqlite:/app/data/chat.db
       - OPENAI_API_KEY=${OPENAI_API_KEY:-YOUR_API_KEY_HERE}
       - OPENAI_MODEL=gpt-3.5-turbo
+      - LLM_TOY_URL=http://llm-toy-service:8001
     volumes:
       - ./data:/app/data
+    depends_on:
+      - llm-toy-service
     restart: unless-stopped
+    networks:
+      - microservices-network
+
+  llm-toy-service:
+    build: ./llm-toy-service
+    container_name: llm-toy-service
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge

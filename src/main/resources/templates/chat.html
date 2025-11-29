@@ -136,6 +136,50 @@
             color: #667eea;
             padding: 10px;
         }
+        .model-btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            background: white;
+            color: #667eea;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .model-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .model-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .prob-table {
+            margin-top: 10px;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        .prob-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .prob-table th, .prob-table td {
+            padding: 5px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .prob-table th {
+            background: #667eea;
+            color: white;
+        }
+
     </style>
 </head>
 <body>
@@ -153,8 +197,13 @@
     </div>
 
     <div class="chat-input-container">
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <button type="button" id="useGptBtn" class="model-btn active">GPT-3.5</button>
+            <button type="button" id="useToyBtn" class="model-btn">LLM Toy</button>
+        </div>
         <form class="chat-input-form" id="chatForm">
             <input type="hidden" id="userId" th:value="${userId}">
+            <input type="hidden" id="currentModel" value="gpt">
             <input
                     type="text"
                     id="messageInput"
@@ -163,6 +212,7 @@
                     required>
             <button type="submit" id="sendBtn">Enviar</button>
         </form>
+    </div>
     </div>
 </div>
 

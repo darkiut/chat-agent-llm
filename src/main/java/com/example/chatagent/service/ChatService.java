@@ -10,29 +10,42 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ChatService {
 
     private final ConversationRepository repository;
     private final OpenAiService openAiService;
+    private final LLMToyService llmToyService;
 
     @Value("${openai.model}")
     private String model;
 
     public ChatService(ConversationRepository repository,
-                       @Value("${openai.api.key}") String apiKey) {
+                       @Value("${openai.api.key}") String apiKey,
+                       LLMToyService llmToyService) {
         this.repository = repository;
         this.openAiService = new OpenAiService(apiKey);
+        this.llmToyService = llmToyService;
     }
 
     public String sendMessage(String userId, String message) {
         try {
-            // VERSIÓN DE PRUEBA - Simula respuestas sin API
-            String response = "🤖 Respuesta simulada: Recibí tu mensaje '" + message + "'. " +
-                    "Para usar GPT real, configura tu API Key de OpenAI en application.properties";
+            // Usar OpenAI GPT
+            ChatCompletionRequest request = ChatCompletionRequest.builder()
+                    .model(model)
+                    .messages(List.of(
+                            new ChatMessage(ChatMessageRole.USER.value(), message)
+                    ))
+                    .build();
 
-            // Guarda la conversación en la base de datos
+            String response = openAiService.createChatCompletion(request)
+                    .getChoices()
+                    .get(0)
+                    .getMessage()
+                    .getContent();
+
             Conversation conv = new Conversation(userId, message, response);
             repository.save(conv);
 
@@ -46,8 +59,32 @@ public class ChatService {
         }
     }
 
+    public Map<String, Object> sendMessageToToy(String userId, String message) {
+        try {
+            // Usar LLM Toy Service
+            Map<String, Object> result = llmToyService.generateWithProbabilities(message);
+
+            // Extraer los tokens generados
+            List<String> tokens = (List<String>) result.get("tokens");
+            String response = String.join(" ", tokens);
+
+            // Guardar en la base de datos
+            Conversation conv = new Conversation(userId, message, response);
+            repository.save(conv);
+
+            // Retornar la respuesta completa con probabilidades
+            return result;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al procesar con LLM Toy: " + e.getMessage(), e);
+        }
+    }
 
     public List<Conversation> getHistory(String userId) {
         return repository.findByUserIdOrderByTimestampAsc(userId);
+    }
+
+    public boolean isToyServiceHealthy() {
+        return llmToyService.isHealthy();
     }
 }
